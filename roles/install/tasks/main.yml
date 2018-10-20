@@ -1,0 +1,6 @@
+---
+# tasks file for install
+
+- name: Set selinux permissive
+  command: setenforce permissive
+

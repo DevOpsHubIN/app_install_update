@@ -1,0 +1,14 @@
+---
+
+hosts: all
+
+tasks:
+  - name: Installing app
+    inlcude:
+      - install
+    when: install is defined and dbtype is defined
+
+
+
+
+

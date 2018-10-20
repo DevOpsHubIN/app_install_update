@@ -1,21 +1,28 @@
 ---
 # tasks file for install
 
+- fail:
+    msg: Unsupported OS
+  when: {{ ansible_distribution }} != 'centos' or {{ ansible_distribution }} != 'redhat'
+
+- debug: 
+    msg: "{{ ansible_distribution }} detected"
+
+- fail:
+    msg: "{{ ansible_distribution }} is not 7"
+  when: {{ major_release }} != 7
+  
+
 - name: Set selinux permissive
   command: setenforce permissive
 
 - name: Installing epel repo
   yum:
     name: epel-release
-    state: present
+    state: latest
+  when: {{ ansible_distribution }} != 'centos'
 
-- name: Checking for version 7 and setting environmental variables
-  command: awk -f ./util/readproperties.awk < /custom/conf/jboss/hda/hda-config.properties > ./config.sh
-  when: {{ vm }} == 'single' and {{ version }} == 7
-
-- name: Checking for version 8 and setting environmental variables
-  command: awk -f ./util/readproperties.awk < /custom/conf/jboss/hda/hda-config.properties > ./config.sh
-  when: {{ vm }} == 'single' and {{ version }} == 8
+# ToDo if ostype is redhat check for subscription manajor.
 
 - name: Check to see if the .creds file exists, supply default if it does not
   stat:

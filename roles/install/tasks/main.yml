@@ -4,3 +4,41 @@
 - name: Set selinux permissive
   command: setenforce permissive
 
+- name: Installing epel repo
+  yum:
+    name: epel-release
+    state: present
+
+- name: Checking for version 7 and setting environmental variables
+  command: awk -f ./util/readproperties.awk < /custom/conf/jboss/hda/hda-config.properties > ./config.sh
+  when: {{ vm }} == 'single' and {{ version }} == 7
+
+- name: Checking for version 8 and setting environmental variables
+  command: awk -f ./util/readproperties.awk < /custom/conf/jboss/hda/hda-config.properties > ./config.sh
+  when: {{ vm }} == 'single' and {{ version }} == 8
+
+- name: Check to see if the .creds file exists, supply default if it does not
+  stat:
+    path: /custom/conf/hda/.creds
+  register: check_creds
+
+- name: take defaults if .creds is not present
+  file:
+    path: /custom/conf/hda
+    state: directory
+  when: check_creds.stat.exists == false
+
+- name: Copy the .creds file from config to hda directory
+  copy: 
+    src: ./config/.creds
+    dest: /custom/conf/hda
+    mode: 600
+  when: check_creds.stat.exists == false
+
+- name: setting up config.sh
+  command: awk -f ./util/readproperties.awk < /custom/conf/hda/.creds >> ./config.sh
+  when: {{ vm }} == 'single'
+
+- name: source the config.sh
+  command: source ./config.sh
+

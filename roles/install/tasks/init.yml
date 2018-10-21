@@ -1,0 +1,31 @@
+---
+#This playbook is for unpdating the HDA to the latest version
+
+- hosts: all
+  become_user: hhit_support
+
+- fail:
+    msg: Unsupported OS
+  when: {{ ansible_distribution }} != 'centos' or {{ ansible_distribution }} != 'redhat'
+
+- name: Install HDA version 8 
+  include: main_v8_install.yml
+  when: {{ hda_install }} is 'yes'
+
+- name: Check for version flag is defined
+  fail: 
+    msg: Unsupported version
+  when: {{ version }} != 8 or {{ version }} != 7
+
+- name: Check parameters for upgrading to version 8
+  fail:
+    msg: Can't skip liquibase or solr during a 7 to 8 upgrade.
+  when: {{ verison }} == 8 and {{ solr }} == 'f' and {{ liquibase }} == 'f'
+
+- name: Upgrading to version 8 
+  include: main_v8.yml
+  when: {{ version }} == 8 and {{ solr }} == 't' and {{ liquibase }} == 't'
+
+- name: Upgrading to version 7 
+  include: main_v7.yml
+  when: {{ version }} == 7 

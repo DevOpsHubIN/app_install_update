@@ -1,0 +1,27 @@
+---
+
+- name: Create Jboss User
+  user: 
+    name: Jboss
+    createhome: yes
+    state: present
+  register: newuser
+
+- debug:
+    msg: "Create Jboss user - Complete"
+
+- name: Create directory if they don't exist
+  file:
+    path: "{{ item }}"
+    owner: root
+    group: root
+    mode: 0775
+  with_items:
+    - /IMG
+    - /custom/app/wildfly
+    - /custom/conf/hda
+    - /custom/data/hda/reporting/purge
+    - /custom/data/hda/uploads
+    - /custom/log/audit
+
+

@@ -1,0 +1,28 @@
+---
+
+- name: Adding the code for mod_jk configuration
+  lineinfile:
+    path: /custom/app/wildfly/wildfly-10.1.0.Final/standalone/configuration/standalone.xml
+    line: '    <system-properties> "\n"        <property name="jvmRoute" value="birt"/> "\n"    </system-properties>'
+    insertafter: '</extensions>*'
+
+- name: Add ajp listener to standalone.xml file
+  lineinfile:
+    path: /custom/app/wildfly/wildfly-10.1.0.Final/standalone/configuration/standalone.xml
+    line: '                <ajp-listener name="ajp-default" socket-binding="ajp"/>'
+    insertafter: '<server name="default-server">*'
+
+- name: Adding socket-binding ajp port to the standalone.xml file
+  lineinfile:
+    path: /custom/app/wildfly/wildfly-10.1.0.Final/standalone/configuration/standalone.xml
+    line: '        <socket-binding name="ajp" port="${jboss.ajp.port:8009}"/>'
+    insertbefore: '<outbound-socket-binding name="mail-smtp">'
+
+- name: Placing the workers.properties and mod_jk.conf files in the /custom/conf/apache
+  copy:
+    src: "{{ item }}"
+    dest: "/custom/conf/apache"
+  with-items:
+    - workers.properties
+    - mod_jk.conf
+

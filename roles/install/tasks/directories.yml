@@ -2,26 +2,53 @@
 
 - name: Create Jboss User
   user: 
-    name: Jboss
+    name: jboss
     createhome: yes
     state: present
+    home: /custom/app
   register: newuser
 
 - debug:
     msg: "Create Jboss user - Complete"
+  when: newuser is defined
 
-- name: Create directory if they don't exist
+- name: setup directory structure
   file:
     path: "{{ item }}"
     owner: root
     group: root
-    mode: 0775
+    mode: 0755
   with_items:
-    - /IMG
-    - /custom/app/wildfly
-    - /custom/conf/hda
-    - /custom/data/hda/reporting/purge
-    - /custom/data/hda/uploads
-    - /custom/log/audit
+    - "/IMG"
+    - "/custom/archive"
+    - "/custom/data/"
+    - "/custom/data/hdt"
+    - "/custom/data/hda/reporting/purge"
+    - "/custom/data/hda/uploads"
+    - "/custom/conf"
+    - "/custom/conf/hda"
+    - "/custom/conf/apache/vhost"
+    - "/custom/conf/apache/modules"
+    - "/custom/conf/apache/cert"
+    - "/custom/conf/apache/key"
+    - "/custom/log/"
+    - "/custom/log/apache/default"
+    - "/custom/log/audit"
+    - "/custom/www/default"
 
 
+- name: setup wildfly directory
+  file:
+    path: "{{ item }}"
+    owner: jboss
+    group: jboss
+    mode: 0755
+  with_items:
+    - "/custom/app/"
+    - "/custom/app/wildfly"
+
+- file:
+    src: /custom
+    dest: /hhit
+       state: link
+       
